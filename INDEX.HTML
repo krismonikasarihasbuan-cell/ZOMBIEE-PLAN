@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zombie Seekers: Battle Royale - Soal Baru</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Comic Sans MS', 'Trebuchet MS', sans-serif; }
+
+  body {
+    background: linear-gradient(135deg, #0d0d1a 0%, #1a0033 50%, #330033 100%);
+    min-height: 100vh; color: #fff; overflow-x: hidden; position: relative;
+  }
+
+  body::before {
+    content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-image:
+      radial-gradient(2px 2px at 20px 30px, #f00, transparent),
+      radial-gradient(2px 2px at 40px 70px, #0f0, transparent),
+      radial-gradient(1px 1px at 90px 40px, #ff0, transparent),
+      radial-gradient(2px 2px at 130px 80px, #f0f, transparent),
+      radial-gradient(1px 1px at 160px 120px, #0ff, transparent);
+    background-size: 200px 200px; animation: twinkle 3s infinite; pointer-events: none; z-index: 0;
+  }
+  @keyframes twinkle { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
+
+  .screen { display: none; animation: fadeIn 0.5s; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .btn {
+    background: linear-gradient(135deg, #7cb342, #558b2f); color: #fff;
+    border: 3px solid #33691e; padding: 14px 28px; font-size: 17px; font-weight: bold;
+    border-radius: 15px; cursor: pointer; transition: all 0.3s;
+    box-shadow: 0 6px 0 #33691e, 0 8px 15px rgba(0,0,0,0.4);
+    text-transform: uppercase; letter-spacing: 1px; margin: 8px;
+  }
+  .btn:hover { transform: translateY(-3px); box-shadow: 0 9px 0 #33691e, 0 12px 20px rgba(0,0,0,0.5); }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #33691e; }
+  .btn.red { background: linear-gradient(135deg, #e53935, #b71c1c); border-color: #7f0000; box-shadow: 0 6px 0 #7f0000, 0 8px 15px rgba(0,0,0,0.4); }
+  .btn.blue { background: linear-gradient(135deg, #42a5f5, #1565c0); border-color: #0d47a1; box-shadow: 0 6px 0 #0d47a1, 0 8px 15px rgba(0,0,0,0.4); }
+  .btn.yellow { background: linear-gradient(135deg, #ffb300, #f57f17); border-color: #e65100; box-shadow: 0 6px 0 #e65100, 0 8px 15px rgba(0,0,0,0.4); color: #000; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+  .header {
+    text-align: center; padding: 20px; background: rgba(0,0,0,0.4);
+    border-radius: 20px; margin-bottom: 20px; border: 3px dashed #e53935;
+  }
+  .header h1 {
+    font-size: 32px; color: #ff5252; text-shadow: 3px 3px 0 #000, 0 0 20px #e53935;
+    margin-bottom: 10px; animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+
+  .zombie { font-size: 80px; text-align: center; animation: zombieWalk 2s infinite; display: inline-block; }
+  @keyframes zombieWalk {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    25% { transform: translateY(-10px) rotate(5deg); }
+    50% { transform: translateY(0) rotate(-5deg); }
+    75% { transform: translateY(-10px) rotate(5deg); }
+  }
+
+  .dialog-box {
+    background: linear-gradient(135deg, #2e7d32, #1b5e20);
+    border: 4px solid #7cb342; border-radius: 20px; padding: 20px; margin: 20px 0;
+    position: relative; box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  }
+  .dialog-box::before {
+    content: '💬'; position: absolute; top: -15px; left: 20px; font-size: 30px;
+    background: #1b5e20; padding: 0 8px; border-radius: 10px;
+  }
+  .dialog-box p { font-size: 16px; line-height: 1.5; color: #e8f5e9; }
+
+  .scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+  .team-score {
+    background: rgba(0,0,0,0.5); border: 4px solid #555; border-radius: 20px;
+    padding: 18px; text-align: center; transition: all 0.3s; position: relative;
+  }
+  .team-score.active { border-color: #ffeb3b; background: rgba(255,235,59,0.2); box-shadow: 0 0 30px #ffeb3b; transform: scale(1.05); }
+  .team-score.buzzed { border-color: #ff5252; background: rgba(229,57,53,0.3); animation: buzzPulse 0.5s infinite; }
+  @keyframes buzzPulse { 0%, 100% { transform: scale(1.05); } 50% { transform: scale(1.1); } }
+  .team-score .team-name { font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #fff; }
+  .team-score .team-score-val { font-size: 42px; font-weight: bold; color: #ffeb3b; text-shadow: 3px 3px 0 #000; }
+  .team-score .team-status { font-size: 13px; color: #ccc; margin-top: 8px; }
+
+  .babak-indicator {
+    text-align: center; padding: 15px;
+    background: linear-gradient(90deg, #6a1b9a, #ad1457);
+    border-radius: 15px; margin: 15px 0; border: 3px solid #ffeb3b;
+    box-shadow: 0 0 20px rgba(255,235,59,0.5);
+  }
+  .babak-indicator .babak-title { font-size: 26px; font-weight: bold; color: #fff; text-shadow: 3px 3px 0 #000; }
+  .babak-indicator .babak-desc { font-size: 14px; color: #ffeb3b; margin-top: 5px; }
+
+  .rebutan-box {
+    background: linear-gradient(135deg, #1a1a3e, #2a2a5e);
+    border: 4px solid #e53935; border-radius: 20px; padding: 30px; margin: 20px 0;
+    text-align: center; box-shadow: 0 0 30px rgba(229,57,53,0.5); min-height: 200px;
+    position: relative;
+  }
+  .rebutan-box .soal-num {
+    display: inline-block; background: #e53935; color: #fff;
+    padding: 6px 18px; border-radius: 20px; font-size: 15px; font-weight: bold; margin-bottom: 15px;
+  }
+  .rebutan-box .level-tag {
+    display: inline-block; background: linear-gradient(135deg, #ff6f00, #e65100);
+    color: #fff; padding: 4px 14px; border-radius: 15px; font-size: 12px; font-weight: bold;
+    margin-left: 8px; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .rebutan-box .soal-text {
+    font-size: 20px; font-weight: bold; color: #fff; line-height: 1.6; margin: 20px 0;
+    text-shadow: 2px 2px 0 #000;
+  }
+  .rebutan-box .timer-big {
+    font-size: 50px; font-weight: bold; color: #ffeb3b;
+    text-shadow: 3px 3px 0 #000, 0 0 20px #ffeb3b; margin: 15px 0;
+  }
+  .rebutan-box .timer-big.warning { color: #ff5252; animation: blink 0.5s infinite; }
+  @keyframes blink { 50% { opacity: 0.3; } }
+
+  .options-rebutan { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+  .opt-rebutan {
+    background: #fff; border: 3px solid #bbb; border-radius: 15px; padding: 15px;
+    font-size: 15px; cursor: pointer; transition: all 0.2s; color: #222;
+    text-align: left; display: flex; align-items: center; gap: 12px;
+    font-family: inherit; font-weight: bold; position: relative; overflow: hidden;
+    min-height: 60px;
+  }
+  .opt-rebutan:hover:not(:disabled) { border-color: #ffeb3b; background: #fff8e1; }
+  .opt-rebutan .letter {
+    background: #6a1b9a; color: #fff; width: 35px; height: 35px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    transition: all 0.3s; z-index: 2;
+  }
+  .opt-rebutan.correct { background: #c8e6c9; border-color: #2e7d32; animation: correctFlash 0.6s; }
+  .opt-rebutan.correct .letter { background: #2e7d32; }
+  .opt-rebutan.wrong { background: #ffcdd2; border-color: #c62828; animation: shake 0.5s; }
+  .opt-rebutan.wrong .letter { background: #c62828; }
+  @keyframes correctFlash {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); box-shadow: 0 0 40px #2e7d32, 0 0 60px #43a047; }
+    100% { transform: scale(1); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-12px); }
+    30% { transform: translateX(12px); }
+    45% { transform: translateX(-8px); }
+    60% { transform: translateX(8px); }
+    75% { transform: translateX(-4px); }
+    90% { transform: translateX(4px); }
+  }
+
+  .cross-mark {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; z-index: 3; animation: crossAppear 0.5s;
+  }
+  @keyframes crossAppear {
+    0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+    70% { transform: scale(1.3) rotate(10deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  .cross-mark svg { width: 60%; height: 60%; }
+  .cross-mark .cross-line {
+    stroke: #d32f2f; stroke-width: 15; stroke-linecap: round;
+    filter: drop-shadow(0 0 10px #d32f2f);
+  }
+
+  .check-mark {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; z-index: 3; animation: checkAppear 0.5s;
+  }
+  @keyframes checkAppear {
+    0% { transform: scale(0) rotate(180deg); opacity: 0; }
+    70% { transform: scale(1.3) rotate(-10deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  .check-mark svg { width: 60%; height: 60%; }
+  .check-mark .check-line {
+    stroke: #2e7d32; stroke-width: 15; stroke-linecap: round; stroke-linejoin: round;
+    filter: drop-shadow(0 0 10px #2e7d32);
+    stroke-dasharray: 200; stroke-dashoffset: 200;
+    animation: drawCheck 0.6s forwards;
+  }
+  @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+
+  .buzzer-area { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+  .buzzer-btn {
+    border: none; border-radius: 20px; padding: 35px 20px; font-size: 24px; font-weight: bold;
+    cursor: pointer; transition: all 0.15s; box-shadow: 0 10px 0 rgba(0,0,0,0.4);
+    color: #fff; text-shadow: 2px 2px 0 rgba(0,0,0,0.5); text-transform: uppercase;
+    letter-spacing: 2px; position: relative;
+  }
+  .buzzer-btn:hover:not(:disabled) { transform: translateY(-4px); box-shadow: 0 14px 0 rgba(0,0,0,0.4); }
+  .buzzer-btn:active:not(:disabled) { transform: translateY(6px); box-shadow: 0 4px 0 rgba(0,0,0,0.4); }
+  .buzzer-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .buzzer-btn.t1 { background: linear-gradient(135deg, #e53935, #b71c1c); }
+  .buzzer-btn.t2 { background: linear-gradient(135deg, #1e88e5, #0d47a1); }
+  .buzzer-btn .buzzer-key { display: block; font-size: 14px; color: rgba(255,255,255,0.8); margin-top: 8px; font-weight: normal; }
+
+  .cek-area {
+    background: linear-gradient(135deg, #4a148c, #311b92);
+    border: 4px solid #ffeb3b; border-radius: 20px; padding: 20px; margin: 20px 0;
+    text-align: center; box-shadow: 0 0 30px rgba(255,235,59,0.4);
+  }
+  .cek-area h3 { color: #ffeb3b; font-size: 20px; margin-bottom: 15px; text-shadow: 2px 2px 0 #000; }
+  .cek-area .pilihan-tim {
+    font-size: 22px; color: #fff; margin: 15px 0; padding: 15px;
+    background: rgba(0,0,0,0.3); border-radius: 15px; border: 2px dashed #ffeb3b;
+  }
+  .cek-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 15px; }
+  .cek-btn {
+    padding: 20px 40px; font-size: 22px; font-weight: bold; border-radius: 20px;
+    cursor: pointer; border: 4px solid; transition: all 0.2s;
+    text-transform: uppercase; letter-spacing: 2px; min-width: 180px;
+  }
+  .cek-btn.benar { background: linear-gradient(135deg, #43a047, #1b5e20); border-color: #2e7d32; color: #fff; box-shadow: 0 8px 0 #1b5e20; }
+  .cek-btn.benar:hover { transform: translateY(-3px); box-shadow: 0 11px 0 #1b5e20, 0 0 30px #43a047; }
+  .cek-btn.salah { background: linear-gradient(135deg, #e53935, #b71c1c); border-color: #c62828; color: #fff; box-shadow: 0 8px 0 #7f0000; }
+  .cek-btn.salah:hover { transform: translateY(-3px); box-shadow: 0 11px 0 #7f0000, 0 0 30px #e53935; }
+  .cek-btn:active { transform: translateY(5px); box-shadow: 0 3px 0 rgba(0,0,0,0.4) !important; }
+
+  .jawaban-reveal {
+    background: linear-gradient(135deg, #1b5e20, #2e7d32);
+    border: 4px solid #7cb342; border-radius: 20px; padding: 20px; margin: 15px 0;
+    text-align: center; animation: revealPop 0.5s;
+  }
+  @keyframes revealPop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .jawaban-reveal h3 { color: #ffeb3b; font-size: 18px; margin-bottom: 10px; }
+  .jawaban-reveal .jawaban-text { font-size: 22px; font-weight: bold; color: #fff; text-shadow: 2px 2px 0 #000; }
+  .jawaban-reveal .pembahasan {
+    background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; margin-top: 15px;
+    color: #e8f5e9; font-size: 14px; line-height: 1.6; text-align: left;
+    border-left: 4px solid #ffeb3b;
+  }
+
+  .podium { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0; align-items: end; min-height: 300px; }
+  .podium-item { text-align: center; padding: 20px 15px; border-radius: 20px; position: relative; transition: all 0.5s; }
+  .podium-item.rank-1 { background: linear-gradient(180deg, #ffd700, #ff8f00); height: 280px; border: 4px solid #ffeb3b; box-shadow: 0 0 40px #ffd700; }
+  .podium-item.rank-2 { background: linear-gradient(180deg, #c0c0c0, #757575); height: 220px; border: 4px solid #e0e0e0; }
+  .podium-item .rank-icon { font-size: 55px; margin-bottom: 10px; }
+  .podium-item .team-name-final { font-size: 22px; font-weight: bold; color: #fff; text-shadow: 2px 2px 0 #000; margin-bottom: 10px; word-break: break-word; }
+  .podium-item .final-score { font-size: 50px; font-weight: bold; color: #fff; text-shadow: 3px 3px 0 #000; }
+  .podium-item .final-label { font-size: 14px; color: rgba(255,255,255,0.9); }
+
+  .control-btn {
+    position: fixed; top: 15px; background: rgba(0,0,0,0.7);
+    border: 2px solid #7cb342; border-radius: 50%; width: 55px; height: 55px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    font-size: 24px; z-index: 999; transition: all 0.3s;
+  }
+  .control-btn:hover { background: rgba(124,179,66,0.5); transform: scale(1.1); }
+  .control-btn.off { opacity: 0.5; }
+  #musicControl { right: 15px; }
+  #voiceControl { right: 80px; border-color: #ffb300; }
+
+  .zombie-chase {
+    position: fixed; bottom: 10px; left: -100px; font-size: 50px; z-index: 100;
+    animation: chase 3s linear infinite; pointer-events: none;
+  }
+  @keyframes chase { 0% { left: -100px; } 50% { left: 100%; } 100% { left: -100px; } }
+
+  @media (max-width: 700px) {
+    .options-rebutan { grid-template-columns: 1fr; }
+    .header h1 { font-size: 22px; }
+    .rebutan-box .soal-text { font-size: 16px; }
+    .buzzer-btn { font-size: 18px; padding: 25px 10px; }
+    .cek-btn { padding: 15px 25px; font-size: 16px; min-width: 120px; }
+    .control-btn { width: 45px; height: 45px; font-size: 20px; }
+    #voiceControl { right: 70px; }
+    .team-score .team-score-val { font-size: 32px; }
+  }
+
+  .soal-enter { animation: soalSlide 0.5s; }
+  @keyframes soalSlide {
+    0% { transform: translateX(100px) scale(0.8); opacity: 0; }
+    100% { transform: translateX(0) scale(1); opacity: 1; }
+  }
+  .shake-screen { animation: screenShake 0.5s; }
+  @keyframes screenShake {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-10px, 5px); }
+    50% { transform: translate(10px, -5px); }
+    75% { transform: translate(-5px, 10px); }
+  }
+
+  .team-input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+  .team-input { background: rgba(255,255,255,0.1); border: 3px solid #7cb342; border-radius: 15px; padding: 20px; }
+  .team-input label { display: block; font-size: 16px; color: #9ccc65; margin-bottom: 10px; font-weight: bold; }
+  .team-input input { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #555; background: #fff; color: #000; font-size: 16px; font-family: inherit; }
+  .team-color-dot { display: inline-block; width: 18px; height: 18px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<div class="control-btn" id="musicControl" onclick="toggleMusic()">🎵</div>
+<div class="control-btn" id="voiceControl" onclick="toggleVoice()">🔊</div>
+
+<div class="container">
+
+  <!-- SCREEN 1: MENU -->
+  <div class="screen active" id="screenMenu">
+    <div class="header">
+      <div class="zombie">🧟‍♂️💀🧟‍♂️</div>
+      <h1>ZOMBIE SEEKERS</h1>
+      <p style="font-size:20px; color:#ff5252; font-weight:bold;">⚔️ BATTLE ROYALE ⚔️</p>
+      <p style="color:#ffeb3b; font-weight:bold; font-size:18px;">🔥 SOAL BARU - LEVEL SULIT 🔥</p>
+    </div>
+
+    <div class="dialog-box">
+      <p><strong>Profesor Zombie:</strong> <span id="menuDialogText">GRRRR! Kali ini soalnya BEDA LAGI! Lebih SULIT dan lebih MENANTANG! Kalian harus benar-benar paham konsep gaya, bukan sekadar hafal! Ada 40 soal baru dalam 4 babak! Siap?!</span></p>
+      <button style="background:#ffb300; border:2px solid #f57f17; border-radius:50%; width:40px; height:40px; font-size:20px; cursor:pointer; margin-left:10px;" onclick="speakText('menuDialogText')">🔊</button>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:15px; margin:20px 0;">
+      <div style="background:rgba(229,57,53,0.2); border:2px solid #e53935; border-radius:15px; padding:15px; text-align:center;">
+        <div style="font-size:30px;">👥</div>
+        <div style="font-size:18px; font-weight:bold; color:#ff5252;">2 Kelompok</div>
+      </div>
+      <div style="background:rgba(229,57,53,0.2); border:2px solid #e53935; border-radius:15px; padding:15px; text-align:center;">
+        <div style="font-size:30px;">🧠</div>
+        <div style="font-size:18px; font-weight:bold; color:#ff5252;">40 Soal Baru</div>
+      </div>
+      <div style="background:rgba(229,57,53,0.2); border:2px solid #e53935; border-radius:15px; padding:15px; text-align:center;">
+        <div style="font-size:30px;">🔔</div>
+        <div style="font-size:18px; font-weight:bold; color:#ff5252;">Lonceng</div>
+      </div>
+      <div style="background:rgba(229,57,53,0.2); border:2px solid #e53935; border-radius:15px; padding:15px; text-align:center;">
+        <div style="font-size:30px;">❌</div>
+        <div style="font-size:18px; font-weight:bold; color:#ff5252;">Silang</div>
+      </div>
+    </div>
+
+    <div class="dialog-box" style="background: linear-gradient(135deg, #4a148c, #311b92); border-color: #ba68c8;">
+      <p><strong>📖 ATURAN:</strong></p>
+      <p>1️⃣ 2 kelompok rebutan dengan <strong>BUZZER</strong></p>
+      <p>2️⃣ Waktu rebutan <strong>10 detik</strong></p>
+      <p>3️⃣ Soal berisi <strong>ANALISIS + PENERAPAN + EVALUASI</strong></p>
+      <p>4️⃣ <strong style="color:#9ccc65;">BENAR = +2 poin + 🔔 LONCENG</strong> | <strong style="color:#ff5252;">SALAH = -1 poin + ❌ SILANG</strong></p>
+      <p>5️⃣ Total <strong>40 soal baru</strong> dalam 4 babak!</p>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <button class="btn" onclick="showScreen('screenSetup')">🎮 MULAI BATTLE BARU</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: SETUP -->
+  <div class="screen" id="screenSetup">
+    <div class="header">
+      <h1>📝 DAFTARKAN 2 KELOMPOK</h1>
+      <p>Isi nama 2 kelompok yang akan bertarung!</p>
+    </div>
+
+    <div class="team-input-grid">
+      <div class="team-input">
+        <label><span class="team-color-dot" style="background:#e53935;"></span>KELOMPOK 1 (Merah)</label>
+        <input type="text" id="team1Name" placeholder="Nama Kelompok 1" value="Zombie Merah" maxlength="20">
+      </div>
+      <div class="team-input">
+        <label><span class="team-color-dot" style="background:#1e88e5;"></span>KELOMPOK 2 (Biru)</label>
+        <input type="text" id="team2Name" placeholder="Nama Kelompok 2" value="Zombie Biru" maxlength="20">
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <button class="btn red" onclick="showScreen('screenMenu')">← Kembali</button>
+      <button class="btn" onclick="startBattle()">⚔️ MULAI PERTARUNGAN!</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: ARENA -->
+  <div class="screen" id="screenArena">
+    <div class="scoreboard" id="scoreboard"></div>
+
+    <div class="babak-indicator">
+      <div class="babak-title" id="babakTitle">⚔️ BABAK 1 ⚔️</div>
+      <div class="babak-desc" id="babakDesc">Soal 1 dari 10</div>
+    </div>
+
+    <div class="dialog-box" style="margin:15px 0;">
+      <p><strong>Profesor Zombie:</strong> <span id="zombieText">Bersiap-siap! Soal akan muncul! Tekan buzzer untuk merebut!</span></p>
+    </div>
+
+    <div class="rebutan-box" id="rebutanBox">
+      <div>
+        <span class="soal-num" id="soalNum">SOAL 1</span>
+        <span class="level-tag" id="levelTag">🔥 SULIT</span>
+      </div>
+      <div class="timer-big" id="rebutanTimer">10</div>
+      <div class="soal-text" id="soalText">Soal akan muncul di sini...</div>
+      <div id="optionsArea"></div>
+    </div>
+
+    <div style="text-align:center; margin:10px 0;">
+      <div style="color:#ffeb3b; font-size:14px; margin-bottom:8px;">👇 TEKAN BUZZER KELOMPOK KALIAN UNTUK MEREBUT SOAL 👇</div>
+    </div>
+    <div class="buzzer-area" id="buzzerArea"></div>
+
+    <div class="cek-area" id="cekArea" style="display:none;">
+      <h3>🎯 PROFESOR ZOMBIE MEMERIKSA JAWABAN...</h3>
+      <div class="pilihan-tim" id="pilihanTim">-</div>
+      <div style="color:#ccc; font-size:14px; margin:10px 0;">Apakah jawaban kelompok ini <strong style="color:#9ccc65;">BENAR</strong> atau <strong style="color:#ff5252;">SALAH</strong>?</div>
+      <div class="cek-buttons">
+        <button class="cek-btn benar" onclick="cakJawaban(true)">✅ BENAR (+2) 🔔</button>
+        <button class="cek-btn salah" onclick="cakJawaban(false)">❌ SALAH (-1)</button>
+      </div>
+    </div>
+
+    <div class="jawaban-reveal" id="jawabanReveal" style="display:none;">
+      <h3>💡 JAWABAN YANG BENAR:</h3>
+      <div class="jawaban-text" id="jawabanText">-</div>
+      <div class="pembahasan" id="pembahasan">-</div>
+    </div>
+
+    <div style="text-align:center; margin:20px 0;">
+      <button class="btn yellow" id="nextSoalBtn" onclick="nextSoal()" style="display:none;">SOAL BERIKUTNYA →</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: HASIL -->
+  <div class="screen" id="screenFinal">
+    <div class="header">
+      <div class="zombie">🏆🧟‍♂️🏆</div>
+      <h1>HASIL BATTLE ROYALE</h1>
+      <p>Siapa ZOMBIE SLAYER sejati?</p>
+    </div>
+
+    <div class="podium" id="podium"></div>
+
+    <div class="dialog-box">
+      <p><strong>Profesor Zombie:</strong> <span id="finalDialogText">...</span></p>
+      <button style="background:#ffb300; border:2px solid #f57f17; border-radius:50%; width:40px; height:40px; font-size:20px; cursor:pointer; margin-left:10px;" onclick="speakText('finalDialogText')">🔊</button>
+    </div>
+
+    <h2 style="color:#9ccc65; text-align:center; margin:20px 0;">📊 STATISTIK KELOMPOK</h2>
+    <div id="statsBox"></div>
+
+    <div style="text-align:center; margin:20px 0;">
+      <button class="btn" onclick="restartBattle()">🔄 MAIN LAGI</button>
+      <button class="btn red" onclick="showScreen('screenMenu')">🏠 Menu Utama</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   DATA SOAL BARU - 4 BABAK × 10 SOAL = 40 SOAL BARU
+   Tema berbeda: SITUASI SEHARI-HARI + TEKNOLOGI + OLAHRAGA
+   ============================================================ */
+const babakData = [
+  {
+    babak: 1, title: "BABAK 1: GAYA DI RUMAH", desc: "Analisis gaya di kehidupan rumah tangga",
+    questions: [
+      {
+        q: "Ibu menjemur pakaian di halaman. Setelah kering, pakaian diangkat dari jemuran. Gaya apa yang harus dilawan ibu saat mengangkat pakaian?",
+        o: ["Gaya magnet", "Gaya gravitasi", "Gaya listrik", "Gaya pegas"],
+        a: 1,
+        pembahasan: "Saat mengangkat pakaian, ibu harus melawan gaya gravitasi yang menarik pakaian ke bawah. Semakin berat pakaian, semakin besar gaya yang dibutuhkan."
+      },
+      {
+        q: "Ayah membuka tutup botol kecap yang sulit dibuka. Ia menuangkan air panas ke tutup botol. Mengapa cara ini berhasil?",
+        o: ["Air panas membuat tutup licin", "Logam tutup memuai karena panas sehingga longgar", "Air panas menghilangkan gaya gesek", "Air panas menarik tutup"],
+        a: 1,
+        pembahasan: "Logam memuai saat dipanaskan. Tutup botol yang terbuat dari logam akan memuai, sehingga celah antara tutup dan botol menjadi lebih besar dan mudah dibuka."
+      },
+      {
+        q: "Kakak menyapu lantai dengan sapu. Saat menyapu, terjadi gaya gesek antara sapu dan lantai. Agar lantai lebih mudah bersih, sebaiknya...",
+        o: ["Lantai dibasahi dulu", "Lantai dibiarkan kering", "Sapu diberi oli", "Lantai diberi sabun"],
+        a: 0,
+        pembahasan: "Lantai yang sedikit dibasahi mengurangi debu yang beterbangan dan membuat gesekan sapu lebih efektif. Jika diberi oli/sabun, lantai justru licin dan sulit dibersihkan."
+      },
+      {
+        q: "Adik bermain dengan magnet di kulkas. Ia menempelkan berbagai benda. Benda mana yang TIDAK akan menempel di kulkas?",
+        o: ["Penjepit kertas", "Paku besi", "Gunting besi", "Karet penghapus"],
+        a: 3,
+        pembahasan: "Magnet hanya menarik benda magnetis (besi, baja, nikel). Karet penghapus bukan benda magnetis, sehingga tidak menempel di kulkas."
+      },
+      {
+        q: "Ketika ibu menimba air di sumur, ia harus menarik tali yang cukup berat. Semakin dalam sumur, semakin berat. Hal ini karena...",
+        o: ["Air semakin dingin", "Tali semakin panjang dan berat, ditambah berat air", "Gravitasi bertambah", "Ember menjadi magnet"],
+        a: 1,
+        pembahasan: "Semakin dalam sumur, semakin panjang tali yang harus diangkat. Ditambah berat ember berisi air. Total gaya otot yang dibutuhkan semakin besar."
+      },
+      {
+        q: "Ayah memasang karet pada pintu lemari agar tidak banting. Fungsi utama karet ini adalah...",
+        o: ["Memperindah lemari", "Menyerap getaran dan memperlambat penutupan (gaya pegas)", "Menambah berat pintu", "Membuat pintu magnetis"],
+        a: 1,
+        pembahasan: "Karet bersifat elastis. Saat pintu menutup, karet menyerap energi dan memperlambat gerak pintu, sehingga tidak berisik dan tidak merusak lemari."
+      },
+      {
+        q: "Ibu memotong sayuran dengan pisau yang tajam. Jika pisau tumpul, ibu harus mengeluarkan tenaga lebih besar. Mengapa?",
+        o: ["Pisau tumpul lebih berat", "Pisau tumpul memiliki bidang kontak lebih luas sehingga tekanan lebih kecil", "Pisau tumpul tidak bisa dipakai", "Pisau tumpul licin"],
+        a: 1,
+        pembahasan: "Tekanan P = F/A. Pisau tumpul punya bidang kontak (A) lebih luas. Dengan gaya F yang sama, tekanan lebih kecil sehingga sayur sulit terpotong."
+      },
+      {
+        q: "Di dapur terdapat penggiling kopi manual. Ketika diputar, biji kopi hancur. Gaya apa yang berperan utama?",
+        o: ["Gaya magnet", "Gaya gravitasi", "Gaya gesek dan putaran", "Gaya listrik"],
+        a: 2,
+        pembahasan: "Penggiling kopi bekerja dengan gaya putar (otot) dan gaya gesek antara mata penggiling dengan biji kopi. Kombinasi keduanya menghancurkan biji kopi."
+      },
+      {
+        q: "Ayah memasang lampu di dinding dengan paku. Saat paku ditancapkan, terjadi gaya...",
+        o: ["Gaya magnet", "Gaya gravitasi", "Gaya otot dan gesek", "Gaya listrik"],
+        a: 2,
+        pembahasan: "Memukul paku memerlukan gaya otot. Saat paku masuk ke dinding, terjadi gaya gesek antara paku dan dinding yang menahan paku agar tidak lepas."
+      },
+      {
+        q: "Kakak menaiki tangga untuk mengganti lampu. Setelah lampu terpasang, ia turun. Gaya apa yang membantunya turun?",
+        o: ["Gaya magnet", "Gaya gravitasi", "Gaya listrik", "Gaya pegas"],
+        a: 1,
+        pembahasan: "Saat turun tangga, gaya gravitasi membantu tubuh bergerak ke bawah. Namun kakak harus tetap berpegangan agar tidak jatuh terlalu cepat."
+      }
+    ]
+  },
+  {
+    babak: 2, title: "BABAK 2: GAYA DI SEKOLAH", desc: "Analisis gaya di lingkungan sekolah",
+    questions: [
+      {
+        q: "Ketika guru menulis di papan tulis dengan spidol, terjadi beberapa gaya. Gaya apa yang TIDAK berperan?",
+        o: ["Gaya otot tangan", "Gaya gesek spidol dan papan", "Gaya magnet", "Gaya tekan"],
+        a: 2,
+        pembahasan: "Menulis dengan spidol melibatkan gaya otot (tangan), gaya gesek (spidol-papan), dan gaya tekan. Gaya magnet tidak berperan karena spidol bukan magnetis."
+      },
+      {
+        q: "Di perpustakaan, buku-buku disusun rapi di rak. Buku paling bawah menahan berat buku di atasnya. Gaya apa yang bekerja?",
+        o: ["Gaya magnet dari rak", "Gaya gravitasi dan gaya tekan", "Gaya listrik statis", "Gaya pegas dari buku"],
+        a: 1,
+        pembahasan: "Buku atas menekan buku bawah karena gaya gravitasi. Buku bawah menahan dengan gaya normal. Ini kombinasi gravitasi dan gaya tekan/normal."
+      },
+      {
+        q: "Saat upacara bendera, tali bendera ditarik agar bendera naik. Gaya yang bekerja pada tali adalah...",
+        o: ["Gaya magnet", "Gaya tarik otot dan gesek dengan katrol", "Gaya listrik", "Gaya gravitasi saja"],
+        a: 1,
+        pembahasan: "Tali ditarik dengan gaya otot. Tali bergesekan dengan katrol (gaya gesek). Bendera naik melawan gravitasi."
+      },
+      {
+        q: "Di kantin, seorang siswa mendorong meja makan agar menyatu dengan meja lain. Meja terasa berat. Yang membuat meja berat saat didorong adalah...",
+        o: ["Gaya magnet dari lantai", "Gaya gesek antara kaki meja dan lantai", "Gaya listrik dari meja", "Gaya pegas dari meja"],
+        a: 1,
+        pembahasan: "Meja terasa berat karena gaya gesek antara kaki meja dan lantai. Semakin kasar lantai dan semakin berat meja, semakin besar gaya gesek, semakin sulit didorong."
+      },
+      {
+        q: "Siswa kelas 4 bermain tarik tambang di lapangan. Tali ditarik dari dua sisi. Jika tim A menang, berarti...",
+        o: ["Tim A memiliki gaya tarik lebih besar dari tim B", "Tim A lebih ringan", "Tim B tidak menarik", "Gravitasi membantu tim A"],
+        a: 0,
+        pembahasan: "Tarik tambang dimenangkan oleh tim dengan gaya tarik lebih besar. Resultan gaya mengarah ke tim A, sehingga tali bergerak ke arah tim A."
+      },
+      {
+        q: "Ketika kita menghapus tulisan di papan tulis, penghapus harus ditekan. Mengapa?",
+        o: ["Agar tidak berdebu", "Agar gaya gesek antara penghapus dan papan cukup untuk menghapus", "Agar papan tidak rusak", "Agar penghapus awet"],
+        a: 1,
+        pembahasan: "Menekan penghapus menambah gaya normal, sehingga gaya gesek bertambah. Gesekan inilah yang mengangkat tulisan dari papan."
+      },
+      {
+        q: "Siswa bermain bola basket. Saat bola dilempar ke ring, bola membentuk lintasan melengkung lalu jatuh. Gaya yang membuat bola jatuh adalah...",
+        o: ["Gaya dorong angin", "Gaya gravitasi", "Gaya magnet", "Gaya listrik"],
+        a: 1,
+        pembahasan: "Setelah dilempar, bola hanya dipengaruhi gaya gravitasi (dan hambatan udara). Gravitasi menarik bola ke bawah, membentuk lintasan melengkung (parabola)."
+      },
+      {
+        q: "Di laboratorium, seorang siswa menggosok balon ke rambutnya lalu mendekatkan ke serpihan kertas. Kertas tertarik. Ini karena...",
+        o: ["Balon menjadi magnet", "Balon bermuatan listrik statis", "Kertas menjadi ringan", "Ada angin dari balon"],
+        a: 1,
+        pembahasan: "Gosokan antara balon dan rambut memindahkan elektron, membuat balon bermuatan listrik statis. Muatan ini menarik serpihan kertas yang ringan."
+      },
+      {
+        q: "Siswa mengangkat kursi untuk diletakkan di atas meja. Gaya apa yang harus ia lawan?",
+        o: ["Gaya magnet kursi", "Gaya gravitasi kursi", "Gaya listrik kursi", "Gaya pegas kursi"],
+        a: 1,
+        pembahasan: "Untuk mengangkat kursi, siswa harus mengerahkan gaya otot yang lebih besar dari gaya gravitasi kursi. Semakin berat kursi, semakin besar gaya yang dibutuhkan."
+      },
+      {
+        q: "Pintu kelas dilengkapi pegas (door closer) agar menutup otomatis. Gaya apa yang membuat pintu menutup sendiri?",
+        o: ["Gaya magnet", "Gaya gravitasi", "Gaya pegas", "Gaya listrik"],
+        a: 2,
+        pembahasan: "Door closer berisi pegas. Saat pintu dibuka, pegas meregang/tertekan. Saat dilepas, pegas kembali ke bentuk semula, menarik pintu menutup."
+      }
+    ]
+  },
+  {
+    babak: 3, title: "BABAK 3: GAYA DI JALAN RAYA", desc: "Analisis gaya pada kendaraan dan lalu lintas",
+    questions: [
+      {
+        q: "Pengendara motor tiba-tiba mengerem mendadak saat ada kucing menyeberang. Motor berhenti, tapi pengendara terdorong ke depan. Mengapa?",
+        o: ["Karena motor berputar", "Karena sifat kelembaman (inersia) benda", "Karena gravitasi bertambah", "Karena motor magnetis"],
+        a: 1,
+        pembahasan: "Saat motor mengerem, tubuh pengendara masih ingin bergerak maju (kelembaman/inersia). Karena itu pengendara terdorong ke depan. Ini Hukum Newton I."
+      },
+      {
+        q: "Truk besar sering memiliki banyak roda. Tujuan utamanya adalah...",
+        o: ["Agar truk terlihat gagah", "Agar gaya tekan tersebar sehingga jalan tidak mudah rusak", "Agar truk cepat", "Agar truk hemat bahan bakar"],
+        a: 1,
+        pembahasan: "Dengan banyak roda, berat truk tersebar di area kontak lebih luas. Tekanan P = F/A menjadi kecil, sehingga jalan tidak mudah rusak/amblas."
+      },
+      {
+        q: "Di jalan menurun, pengendara sepeda tidak perlu mengayuh tapi sepeda tetap melaju. Energi apa yang berperan?",
+        o: ["Energi listrik dari dinamo", "Energi potensial gravitasi berubah menjadi energi kinetik", "Energi magnet dari roda", "Energi pegas dari sadel"],
+        a: 1,
+        pembahasan: "Saat di puncak jalan, sepeda punya energi potensial gravitasi. Menurun, energi ini berubah menjadi energi kinetik (gerak), membuat sepeda melaju tanpa dikayuh."
+      },
+      {
+        q: "Bus kota memiliki pintu otomatis yang bisa terbuka dan menutup dengan sendirinya. Mekanisme ini menggunakan gaya...",
+        o: ["Magnet dan listrik", "Gravitasi saja", "Listrik dan pegas/motor", "Otot manusia"],
+        a: 2,
+        pembahasan: "Pintu bus otomatis digerakkan oleh motor listrik. Ada juga pegas yang membantu menutup/membuka. Jadi kombinasi listrik dan pegas/motor."
+      },
+      {
+        q: "Sebuah mobil balap memiliki bentuk yang sangat aerodinamis (ramping). Tujuan utamanya adalah...",
+        o: ["Agar terlihat keren", "Agar mengurangi gaya hambat udara sehingga lebih cepat", "Agar lebih berat", "Agar lebih murah"],
+        a: 1,
+        pembahasan: "Bentuk aerodinamis mengurangi gaya gesek/hambatan udara. Semakin kecil hambatan, semakin cepat mobil melaju dengan tenaga yang sama."
+      },
+      {
+        q: "Di jalan tol, ada batas kecepatan maksimum. Alasan fisisnya adalah...",
+        o: ["Agar hemat bahan bakar", "Agar pengendara bisa mengontrol kendaraan jika terjadi bahaya", "Agar tidak berdebu", "Agar jalan awet"],
+        a: 1,
+        pembahasan: "Semakin cepat, semakin panjang jarak pengereman. Dengan batas kecepatan, pengendara masih punya waktu dan jarak untuk menghentikan kendaraan saat bahaya."
+      },
+      {
+        q: "Kereta api memiliki roda yang sangat banyak dan panjang. Tujuannya agar...",
+        o: ["Kereta cepat", "Berat kereta tersebar merata sehingga rel tidak mudah rusak", "Kereta tidak berisik", "Kereta hemat energi"],
+        a: 1,
+        pembahasan: "Berat kereta yang sangat besar jika hanya ditopang sedikit roda akan merusak rel. Dengan banyak roda, tekanan tersebar dan rel lebih awet."
+      },
+      {
+        q: "Pengendara sepeda motor memakai helm dengan kaca pelindung. Fungsi utama kaca pelindung adalah...",
+        o: ["Agar terlihat keren", "Melindungi mata dari angin, debu, dan serangga saat melaju", "Agar helm lebih berat", "Agar tidak kepanasan"],
+        a: 1,
+        pembahasan: "Saat melaju, angin dan debu menghantam wajah dengan gaya besar. Kaca pelindung melindungi mata dan wajah dari benda-benda tersebut."
+      },
+      {
+        q: "Ban sepeda yang kurang angin akan terasa lebih berat dikayuh. Mengapa?",
+        o: ["Ban menjadi lebih berat", "Bidang kontak ban dengan jalan lebih luas, gaya gesek bertambah", "Ban menjadi magnetis", "Gravitasi bertambah"],
+        a: 1,
+        pembahasan: "Ban kempes membuat bidang kontak dengan jalan lebih luas. Semakin luas kontak, semakin besar gaya gesek. Akibatnya sepeda lebih sulit dikayuh."
+      },
+      {
+        q: "Kendaraan bermotor memiliki knalpot. Gas buang keluar dari knalpot karena...",
+        o: ["Gaya magnet dari mesin", "Gaya dorong dari tekanan gas dalam mesin", "Gaya gravitasi", "Gaya listrik"],
+        a: 1,
+        pembahasan: "Gas hasil pembakaran memiliki tekanan tinggi dalam mesin. Gas ini didorong keluar melalui knalpot karena perbedaan tekanan (dari tekanan tinggi ke rendah)."
+      }
+    ]
+  },
+  {
+    babak: 4, title: "BABAK 4: FINAL - GAYA DI ALAM", desc: "Analisis gaya di alam dan teknologi canggih",
+    questions: [
+      {
+        q: "Saat terjadi gempa bumi, bangunan tinggi bisa roboh. Gaya apa yang bekerja pada bangunan saat gempa?",
+        o: ["Gaya magnet dari bumi", "Gaya getar/guncangan dari dalam bumi", "Gaya listrik dari awan", "Gaya pegas dari tanah"],
+        a: 1,
+        pembahasan: "Gempa menghasilkan gelombang getaran (gaya geser) dari dalam bumi. Bangunan yang tidak tahan getaran bisa roboh karena gaya ini melebihi kekuatan struktur."
+      },
+      {
+        q: "Air terjun yang tinggi dapat memutar turbin pembangkit listrik. Perubahan energi yang terjadi adalah...",
+        o: ["Energi listrik → energi gerak", "Energi potensial gravitasi air → energi kinetik → energi listrik", "Energi magnet → energi listrik", "Energi panas → energi listrik"],
+        a: 1,
+        pembahasan: "Air di ketinggian punya energi potensial. Jatuh menjadi energi kinetik, memutar turbin, lalu generator mengubahnya menjadi energi listrik."
+      },
+      {
+        q: "Burung dapat terbang tinggi di angkasa. Gaya apa yang melawan gravitasi pada burung?",
+        o: ["Gaya magnet dari bumi", "Gaya angkat dari kepakan sayap", "Gaya listrik dari udara", "Gaya pegas dari bulu"],
+        a: 1,
+        pembahasan: "Burung mengepakkan sayap untuk menghasilkan gaya angkat (lift) dari udara. Gaya ini melawan gravitasi sehingga burung bisa terbang."
+      },
+      {
+        q: "Petir menyambar pohon tinggi di tengah lapangan. Mengapa pohon tinggi lebih sering tersambar petir?",
+        o: ["Pohon mengandung magnet", "Pohon tinggi lebih dekat ke awan bermuatan, dan ujung runcingnya mempermudah pelepasan muatan", "Pohon tinggi menyerap listrik", "Pohon tinggi berwarna gelap"],
+        a: 1,
+        pembahasan: "Petir mencari jalur terdekat dan termudah ke bumi. Pohon tinggi lebih dekat ke awan dan ujungnya runcing, sehingga mempermudah pelepasan muatan listrik."
+      },
+      {
+        q: "Saat hujan deras, jalan menjadi licin. Pengendara harus berhati-hati karena...",
+        o: ["Jalan menjadi magnetis", "Air mengurangi gaya gesek antara ban dan jalan", "Gravitasi bertambah", "Angin bertambah"],
+        a: 1,
+        pembahasan: "Air di jalan berperan sebagai pelumas. Gaya gesek antara ban dan jalan berkurang. Akibatnya ban mudah selip dan kendaraan sulit dikendalikan."
+      },
+      {
+        q: "Pesawat luar angkasa yang kembali ke bumi memasuki atmosfer dengan kecepatan tinggi dan menjadi panas. Gaya utama yang menyebabkan panas adalah...",
+        o: ["Gaya magnet bumi", "Gaya gesek dengan molekul udara atmosfer", "Gaya gravitasi bulan", "Gaya listrik dari matahari"],
+        a: 1,
+        pembahasan: "Gesekan antara pesawat dan molekul udara atmosfer sangat besar pada kecepatan tinggi. Energi kinetik berubah menjadi panas, sehingga pesawat dan udara di sekitarnya panas."
+      },
+      {
+        q: "Batu besar di sungai yang deras tetap diam di dasar meski air mengalir kencang. Mengapa?",
+        o: ["Batu lebih berat dari air", "Gaya dorong air lebih kecil dari berat dan gesek batu dengan dasar", "Batu mengandung magnet", "Air tidak punya gaya"],
+        a: 1,
+        pembahasan: "Batu diam karena resultan gaya nol. Gaya dorong air lebih kecil dari berat batu dan gaya gesek antara batu dengan dasar sungai. Jadi batu tetap di tempatnya."
+      },
+      {
+        q: "Planet-planet di tata surya bergerak mengelilingi matahari. Gaya apa yang menyebabkan hal ini?",
+        o: ["Gaya magnet matahari", "Gaya gravitasi matahari", "Gaya listrik matahari", "Gaya pegas ruang angkasa"],
+        a: 1,
+        pembahasan: "Gaya gravitasi matahari yang sangat besar menarik planet-planet. Gaya ini berperan sebagai gaya sentripetal yang menjaga planet tetap mengorbit."
+      },
+      {
+        q: "Ketika kita melempar batu ke danau, batu tenggelam. Tapi kapal besar bisa terapung. Faktor utama yang menentukan terapung/tenggelam adalah...",
+        o: ["Warna benda", "Massa jenis benda dibanding massa jenis air", "Bentuk benda", "Suhu benda"],
+        a: 1,
+        pembahasan: "Benda terapung jika massa jenisnya lebih kecil dari massa jenis zat cair. Kapal berongga memiliki massa jenis rata-rata kecil (karena udara di dalam), sehingga terapung."
+      },
+      {
+        q: "Banjir dapat terjadi karena aliran air yang kuat. Faktor utama yang membuat air banjir sangat kuat adalah...",
+        o: ["Warna air", "Volume air besar dan gravitasi yang menariknya ke bawah", "Suhu air dingin", "Air mengandung magnet"],
+        a: 1,
+        pembahasan: "Air banjir memiliki massa besar. Gaya gravitasi menarik massa ini ke tempat lebih rendah. Semakin besar volume air, semakin besar gaya dorongnya."
+      }
+    ]
+  }
+];
+
+/* ============================================================
+   STATE BATTLE
+   ============================================================ */
+let battleState = {
+  teams: [
+    { id: 1, name: "Zombie Merah", color: "#e53935", score: 0, correct: 0, wrong: 0, buzzed: 0 },
+    { id: 2, name: "Zombie Biru", color: "#1e88e5", score: 0, correct: 0, wrong: 0, buzzed: 0 }
+  ],
+  currentBabak: 0,
+  currentSoal: 0,
+  buzzingTeam: null,
+  selectedOption: null,
+  phase: 'waiting',
+  rebutanTimer: null,
+  rebutanTimeLeft: 10,
+  musicOn: true,
+  voiceOn: true,
+  keyboardHandler: null
+};
+
+/* ============================================================
+   TEXT-TO-SPEECH
+   ============================================================ */
+let voices = [];
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = function() { voices = speechSynthesis.getVoices(); };
+  voices = speechSynthesis.getVoices();
+}
+
+function speak(text, callback) {
+  if (!battleState.voiceOn || !('speechSynthesis' in window)) {
+    if (callback) callback();
+    return;
+  }
+  try {
+    speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    const idVoice = voices.find(function(v) { return v.lang === 'id-ID' || v.lang.startsWith('id'); });
+    if (idVoice) utter.voice = idVoice;
+    utter.pitch = 0.7;
+    utter.rate = 0.95;
+    utter.volume = 1.0;
+    utter.onend = function() { if (callback) callback(); };
+    utter.onerror = function() { if (callback) callback(); };
+    speechSynthesis.speak(utter);
+  } catch(e) {
+    if (callback) callback();
+  }
+}
+
+function speakText(id) {
+  const el = document.getElementById(id);
+  if (el) speak(el.textContent);
+}
+
+function toggleVoice() {
+  battleState.voiceOn = !battleState.voiceOn;
+  const btn = document.getElementById('voiceControl');
+  btn.textContent = battleState.voiceOn ? '🔊' : '🔇';
+  btn.classList.toggle('off', !battleState.voiceOn);
+  if (!battleState.voiceOn) {
+    try { speechSynthesis.cancel(); } catch(e) {}
+  }
+}
+
+/* ============================================================
+   AUDIO
+   ============================================================ */
+let audioCtx = null;
+let musicInterval = null;
+
+function initAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playTone(freq, dur, type, vol, delay) {
+  type = type || 'sine'; vol = vol || 0.05; delay = delay || 0;
+  if (!audioCtx || !battleState.musicOn) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    const startTime = audioCtx.currentTime + delay;
+    gain.gain.setValueAtTime(vol, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + dur);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(startTime);
+    osc.stop(startTime + dur);
+  } catch(e) {}
+}
+
+function sfxBell() {
+  if (!battleState.musicOn) return;
+  initAudio();
+  if (!audioCtx) return;
+  const baseFreq = 880;
+  const harmonics = [1, 2, 2.76, 5.4];
+  const volumes = [0.15, 0.08, 0.06, 0.03];
+  harmonics.forEach(function(h, i) {
+    try {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = baseFreq * h;
+      const startTime = audioCtx.currentTime;
+      gain.gain.setValueAtTime(volumes[i], startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 1.5);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + 1.5);
+    } catch(e) {}
+  });
+  setTimeout(function() {
+    if (!audioCtx || !battleState.musicOn) return;
+    harmonics.forEach(function(h, i) {
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = baseFreq * h * 1.5;
+        const startTime = audioCtx.currentTime;
+        gain.gain.setValueAtTime(volumes[i] * 0.7, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 1.2);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + 1.2);
+      } catch(e) {}
+    });
+  }, 200);
+}
+
+function sfxWrong() {
+  if (!battleState.musicOn) return;
+  initAudio();
+  if (!audioCtx) return;
+  try {
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc1.type = 'sawtooth';
+    osc1.frequency.value = 150;
+    osc2.type = 'square';
+    osc2.frequency.value = 100;
+    const startTime = audioCtx.currentTime;
+    gain.gain.setValueAtTime(0.12, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.8);
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc1.start(startTime);
+    osc2.start(startTime);
+    osc1.stop(startTime + 0.8);
+    osc2.stop(startTime + 0.8);
+  } catch(e) {}
+}
+
+function sfxBuzz() {
+  if (!battleState.musicOn) return;
+  initAudio();
+  playTone(880, 0.15, 'square', 0.15);
+  playTone(1100, 0.1, 'square', 0.1, 0.05);
+}
+
+function sfxTick() {
+  if (!battleState.musicOn) return;
+  initAudio();
+  playTone(1200, 0.05, 'square', 0.06);
+}
+
+function sfxVictory() {
+  if (!battleState.musicOn) return;
+  initAudio();
+  const notes = [523, 659, 784, 1047, 1319, 1568];
+  notes.forEach(function(n, i) { playTone(n, 0.3, 'triangle', 0.13, i * 0.12); });
+}
+
+const melodies = {
+  menu: [262, 330, 392, 330, 262, 330, 392, 523],
+  babak1: [262, 294, 330, 294, 262, 294, 330, 349],
+  babak2: [330, 349, 392, 349, 330, 294, 262, 294],
+  babak3: [392, 440, 494, 440, 392, 349, 330, 349],
+  babak4: [523, 659, 784, 659, 523, 659, 784, 1047]
+};
+
+function startBgMusic(key) {
+  key = key || 'menu';
+  if (!battleState.musicOn) return;
+  initAudio();
+  stopBgMusic();
+  const mel = melodies[key] || melodies.menu;
+  let i = 0;
+  musicInterval = setInterval(function() {
+    if (!battleState.musicOn) return;
+    const f = mel[i % mel.length];
+    playTone(f, 0.3, 'triangle', 0.035);
+    if (i % 4 === 0) playTone(f / 2, 0.5, 'sine', 0.025);
+    i++;
+  }, 350);
+}
+
+function stopBgMusic() {
+  if (musicInterval) { clearInterval(musicInterval); musicInterval = null; }
+}
+
+function toggleMusic() {
+  battleState.musicOn = !battleState.musicOn;
+  const btn = document.getElementById('musicControl');
+  btn.textContent = battleState.musicOn ? '🎵' : '🔇';
+  btn.classList.toggle('off', !battleState.musicOn);
+  if (battleState.musicOn) {
+    initAudio();
+    const key = ['babak1','babak2','babak3','babak4'][battleState.currentBabak] || 'menu';
+    startBgMusic(key);
+  } else {
+    stopBgMusic();
+  }
+}
+
+/* ============================================================
+   NAVIGASI
+   ============================================================ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'screenMenu') {
+    startBgMusic('menu');
+    setTimeout(function() { const el = document.getElementById('menuDialogText'); if (el) speak(el.textContent); }, 600);
+  }
+}
+
+/* ============================================================
+   START BATTLE
+   ============================================================ */
+function startBattle() {
+  initAudio();
+  const t1 = document.getElementById('team1Name');
+  const t2 = document.getElementById('team2Name');
+  if (t1 && t1.value.trim()) battleState.teams[0].name = t1.value.trim();
+  if (t2 && t2.value.trim()) battleState.teams[1].name = t2.value.trim();
+  
+  battleState.teams.forEach(function(t) { t.score = 0; t.correct = 0; t.wrong = 0; t.buzzed = 0; });
+  battleState.currentBabak = 0;
+  battleState.currentSoal = 0;
+  battleState.buzzingTeam = null;
+  battleState.selectedOption = null;
+  battleState.phase = 'waiting';
+  
+  showScreen('screenArena');
+  renderScoreboard();
+  renderBuzzers();
+  setupKeyboard();
+  startBabak(0);
+}
+
+function startBabak(babakIndex) {
+  battleState.currentBabak = babakIndex;
+  battleState.currentSoal = 0;
+  const babak = babakData[babakIndex];
+  
+  document.getElementById('babakTitle').textContent = '⚔️ ' + babak.title + ' ⚔️';
+  document.getElementById('babakDesc').textContent = babak.desc;
+  
+  startBgMusic('babak' + (babakIndex + 1));
+  
+  const zombieMsg = 'Babak ' + (babakIndex + 1) + '! ' + babak.desc + '. Bersiap rebutan!';
+  document.getElementById('zombieText').textContent = zombieMsg;
+  speak(zombieMsg, function() {
+    setTimeout(function() { loadSoal(); }, 500);
+  });
+}
+
+/* ============================================================
+   LOAD SOAL
+   ============================================================ */
+function loadSoal() {
+  const babak = babakData[battleState.currentBabak];
+  const soal = babak.questions[battleState.currentSoal];
+  
+  battleState.phase = 'waiting';
+  battleState.buzzingTeam = null;
+  battleState.selectedOption = null;
+  battleState.rebutanTimeLeft = 10;
+  
+  document.getElementById('babakDesc').textContent = 'Soal ' + (battleState.currentSoal + 1) + ' dari ' + babak.questions.length;
+  document.getElementById('soalNum').textContent = 'SOAL ' + (battleState.currentSoal + 1);
+  document.getElementById('soalText').textContent = soal.q;
+  document.getElementById('rebutanTimer').textContent = '10';
+  document.getElementById('rebutanTimer').classList.remove('warning');
+  document.getElementById('optionsArea').innerHTML = '';
+  document.getElementById('cekArea').style.display = 'none';
+  document.getElementById('jawabanReveal').style.display = 'none';
+  document.getElementById('nextSoalBtn').style.display = 'none';
+  
+  renderBuzzers();
+  enableBuzzers(true);
+  renderOptions(soal, false);
+  renderScoreboard();
+  
+  const letters = ['A','B','C','D'];
+  let soalText = 'Soal nomor ' + (battleState.currentSoal + 1) + '. ' + soal.q + ' ';
+  soal.o.forEach(function(opt, i) { soalText += 'Pilihan ' + letters[i] + '. ' + opt + '. '; });
+  speak(soalText, function() { startRebutanTimer(); });
+  
+  document.getElementById('rebutanBox').classList.add('soal-enter');
+  setTimeout(function() { document.getElementById('rebutanBox').classList.remove('soal-enter'); }, 500);
+}
+
+/* ============================================================
+   TIMER REBUTAN
+   ============================================================ */
+function startRebutanTimer() {
+  clearInterval(battleState.rebutanTimer);
+  battleState.rebutanTimeLeft = 10;
+  updateRebutanTimer();
+  
+  battleState.rebutanTimer = setInterval(function() {
+    battleState.rebutanTimeLeft--;
+    updateRebutanTimer();
+    if (battleState.rebutanTimeLeft <= 3 && battleState.rebutanTimeLeft > 0) sfxTick();
+    if (battleState.rebutanTimeLeft <= 0) {
+      clearInterval(battleState.rebutanTimer);
+      timeUpRebutan();
+    }
+  }, 1000);
+}
+
+function updateRebutanTimer() {
+  const el = document.getElementById('rebutanTimer');
+  el.textContent = battleState.rebutanTimeLeft;
+  if (battleState.rebutanTimeLeft <= 3) el.classList.add('warning');
+  else el.classList.remove('warning');
+}
+
+function timeUpRebutan() {
+  if (battleState.phase !== 'waiting') return;
+  battleState.phase = 'revealed';
+  enableBuzzers(false);
+  
+  const babak = babakData[battleState.currentBabak];
+  const soal = babak.questions[battleState.currentSoal];
+  
+  document.getElementById('soalText').textContent = '⏰ WAKTU HABIS! Tidak ada yang menjawab!';
+  document.getElementById('rebutanTimer').textContent = '0';
+  
+  const letters = ['A','B','C','D'];
+  document.getElementById('jawabanText').textContent = letters[soal.a] + '. ' + soal.o[soal.a];
+  document.getElementById('pembahasan').textContent = '📚 ' + soal.pembahasan;
+  document.getElementById('jawabanReveal').style.display = 'block';
+  
+  const msg = 'Waktu habis! Tidak ada yang menjawab. Jawaban benar: ' + letters[soal.a] + '. ' + soal.o[soal.a];
+  document.getElementById('zombieText').textContent = msg;
+  speak(msg);
+  
+  document.getElementById('nextSoalBtn').style.display = 'inline-block';
+}
+
+/* ============================================================
+   BUZZER
+   ============================================================ */
+function renderBuzzers() {
+  const area = document.getElementById('buzzerArea');
+  area.innerHTML = '';
+  battleState.teams.forEach(function(team, i) {
+    const btn = document.createElement('button');
+    btn.className = 'buzzer-btn t' + (i + 1);
+    btn.id = 'buzzer' + (i + 1);
+    btn.innerHTML = team.name + '<span class="buzzer-key">Tekan [' + (i + 1) + ']</span>';
+    btn.addEventListener('click', function() { buzz(i); });
+    area.appendChild(btn);
+  });
+}
+
+function enableBuzzers(enabled) {
+  for (let i = 1; i <= 2; i++) {
+    const b = document.getElementById('buzzer' + i);
+    if (b) b.disabled = !enabled;
+  }
+}
+
+function buzz(teamIndex) {
+  if (battleState.phase !== 'waiting') return;
+  if (battleState.buzzingTeam !== null) return;
+  
+  clearInterval(battleState.rebutanTimer);
+  battleState.phase = 'answering';
+  battleState.buzzingTeam = teamIndex;
+  battleState.teams[teamIndex].buzzed++;
+  
+  sfxBuzz();
+  document.body.classList.add('shake-screen');
+  setTimeout(function() { document.body.classList.remove('shake-screen'); }, 500);
+  
+  renderScoreboard();
+  const scoreEls = document.querySelectorAll('.team-score');
+  if (scoreEls[teamIndex]) scoreEls[teamIndex].classList.add('buzzed');
+  enableBuzzers(false);
+  
+  const teamName = battleState.teams[teamIndex].name;
+  const msg = teamName + ' berhasil merebut! Silakan pilih jawaban!';
+  document.getElementById('zombieText').textContent = msg;
+  speak(msg);
+  
+  const babak = babakData[battleState.currentBabak];
+  const soal = babak.questions[battleState.currentSoal];
+  renderOptions(soal, true);
+  
+  document.getElementById('soalText').textContent = soal.q + ' [' + teamName + ' menjawab!]';
+  document.getElementById('rebutanTimer').textContent = '🎯';
+  document.getElementById('rebutanTimer').classList.remove('warning');
+}
+
+/* ============================================================
+   RENDER OPSI
+   ============================================================ */
+function renderOptions(soal, enabled) {
+  const box = document.getElementById('optionsArea');
+  box.innerHTML = '';
+  
+  const wrapper = document.createElement('div');
+  wrapper.className = 'options-rebutan';
+  
+  const letters = ['A','B','C','D'];
+  
+  soal.o.forEach(function(opt, i) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'opt-rebutan';
+    btn.id = 'opt' + i;
+    
+    const letterSpan = document.createElement('span');
+    letterSpan.className = 'letter';
+    letterSpan.textContent = letters[i];
+    
+    const textSpan = document.createElement('span');
+    textSpan.textContent = opt;
+    
+    btn.appendChild(letterSpan);
+    btn.appendChild(textSpan);
+    
+    btn.disabled = !enabled;
+    
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      pilihJawaban(i);
+    });
+    
+    wrapper.appendChild(btn);
+  });
+  
+  box.appendChild(wrapper);
+}
+
+/* ============================================================
+   PILIH JAWABAN
+   ============================================================ */
+function pilihJawaban(optIndex) {
+  if (battleState.phase !== 'answering') return;
+  
+  battleState.phase = 'cak';
+  battleState.selectedOption = optIndex;
+  
+  const babak = babakData[battleState.currentBabak];
+  const soal = babak.questions[battleState.currentSoal];
+  const letters = ['A','B','C','D'];
+  const team = battleState.teams[battleState.buzzingTeam];
+  
+  const allOpts = document.querySelectorAll('.opt-rebutan');
+  allOpts.forEach(function(el, i) {
+    el.disabled = true;
+    if (i === optIndex) {
+      el.style.borderColor = '#ffeb3b';
+      el.style.borderWidth = '5px';
+      el.style.boxShadow = '0 0 20px #ffeb3b';
+    }
+  });
+  
+  document.getElementById('pilihanTim').textContent = team.name + ' memilih: ' + letters[optIndex] + '. ' + soal.o[optIndex];
+  document.getElementById('cekArea').style.display = 'block';
+  
+  setTimeout(function() {
+    document.getElementById('cekArea').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+  
+  const msg = 'Profesor Zombie, periksa jawaban ' + team.name + '! Apakah BENAR atau SALAH?';
+  document.getElementById('zombieText').textContent = msg;
+  speak(msg);
+}
+
+/* ============================================================
+   CAK JAWABAN
+   ============================================================ */
+function cakJawaban(isBenar) {
+  if (battleState.phase !== 'cak') return;
+  battleState.phase = 'revealed';
+  
+  const babak = babakData[battleState.currentBabak];
+  const soal = babak.questions[battleState.currentSoal];
+  const team = battleState.teams[battleState.buzzingTeam];
+  const letters = ['A','B','C','D'];
+  const userChoice = battleState.selectedOption;
+  const optEl = document.getElementById('opt' + userChoice);
+  
+  if (isBenar) {
+    team.score += 2;
+    team.correct++;
+    sfxBell();
+    if (optEl) {
+      optEl.classList.add('correct');
+      const checkHTML = '<div class="check-mark"><svg viewBox="0 0 100 100"><polyline class="check-line" points="20,55 42,75 80,25" fill="none"/></svg></div>';
+      optEl.insertAdjacentHTML('beforeend', checkHTML);
+    }
+  } else {
+    team.score -= 1;
+    team.wrong++;
+    sfxWrong();
+    if (optEl) {
+      optEl.classList.add('wrong');
+      const crossHTML = '<div class="cross-mark"><svg viewBox="0 0 100 100"><line class="cross-line" x1="20" y1="20" x2="80" y2="80"/><line class="cross-line" x1="80" y1="20" x2="20" y2="80"/></svg></div>';
+      optEl.insertAdjacentHTML('beforeend', crossHTML);
+    }
+    document.body.classList.add('shake-screen');
+    setTimeout(function() { document.body.classList.remove('shake-screen'); }, 500);
+  }
+  
+  document.getElementById('jawabanText').textContent = letters[soal.a] + '. ' + soal.o[soal.a];
+  document.getElementById('pembahasan').textContent = '📚 ' + soal.pembahasan;
+  document.getElementById('jawabanReveal').style.display = 'block';
+  
+  renderScoreboard();
+  
+  const resultMsg = isBenar
+    ? '🔔 BENAR! Lonceng berbunyi! ' + team.name + ' mendapat 2 poin! Total: ' + team.score
+    : '❌ SALAH! ' + team.name + ' dikurangi 1 poin! Total: ' + team.score + '. Jawaban benar: ' + letters[soal.a] + '. ' + soal.o[soal.a];
+  document.getElementById('zombieText').textContent = resultMsg;
+  
+  setTimeout(function() { speak(resultMsg); }, isBenar ? 1000 : 900);
+  
+  document.getElementById('cekArea').style.display = 'none';
+  document.getElementById('nextSoalBtn').style.display = 'inline-block';
+  
+  setTimeout(function() {
+    document.getElementById('jawabanReveal').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 500);
+}
+
+/* ============================================================
+   NEXT SOAL
+   ============================================================ */
+function nextSoal() {
+  battleState.currentSoal++;
+  const babak = babakData[battleState.currentBabak];
+  
+  if (battleState.currentSoal >= babak.questions.length) {
+    if (battleState.currentBabak < babakData.length - 1) {
+      const msg = 'Babak ' + (battleState.currentBabak + 1) + ' selesai! Bersiap untuk babak berikutnya!';
+      document.getElementById('zombieText').textContent = msg;
+      speak(msg, function() {
+        setTimeout(function() { startBabak(battleState.currentBabak + 1); }, 500);
+      });
+    } else {
+      finishBattle();
+    }
+  } else {
+    loadSoal();
+  }
+}
+
+/* ============================================================
+   SCOREBOARD
+   ============================================================ */
+function renderScoreboard() {
+  const sb = document.getElementById('scoreboard');
+  sb.innerHTML = '';
+  battleState.teams.forEach(function(team, i) {
+    const div = document.createElement('div');
+    div.className = 'team-score';
+    if (battleState.buzzingTeam === i) div.classList.add('active');
+    div.style.borderColor = team.color;
+    div.innerHTML = 
+      '<div class="team-name" style="color:' + team.color + ';">' + team.name + '</div>' +
+      '<div class="team-score-val">' + team.score + '</div>' +
+      '<div class="team-status">✓ ' + team.correct + ' | ✗ ' + team.wrong + ' | ⚡ ' + team.buzzed + '</div>';
+    sb.appendChild(div);
+  });
+}
+
+/* ============================================================
+   FINISH
+   ============================================================ */
+function finishBattle() {
+  clearInterval(battleState.rebutanTimer);
+  stopBgMusic();
+  sfxVictory();
+  
+  showScreen('screenFinal');
+  
+  const sorted = [].concat(battleState.teams).sort(function(a, b) { return b.score - a.score; });
+  
+  const podium = document.getElementById('podium');
+  podium.innerHTML = '';
+  sorted.forEach(function(team, rank) {
+    const div = document.createElement('div');
+    div.className = 'podium-item rank-' + (rank + 1);
+    const rankIcons = ['🥇', '🥈'];
+    div.innerHTML = 
+      '<div class="rank-icon">' + rankIcons[rank] + '</div>' +
+      '<div class="team-name-final">' + team.name + '</div>' +
+      '<div class="final-score">' + team.score + '</div>' +
+      '<div class="final-label">poin</div>';
+    podium.appendChild(div);
+  });
+  
+  const winner = sorted[0];
+  const isTie = sorted[0].score === sorted[1].score;
+  let msg;
+  if (isTie) {
+    msg = 'PERTARUNGAN SERI! ' + sorted[0].name + ' dan ' + sorted[1].name + ' sama-sama kuat dengan ' + winner.score + ' poin!';
+  } else {
+    msg = 'PEMENANGNYA ADALAH ' + winner.name + ' dengan ' + winner.score + ' poin! Kalian adalah ZOMBIE SLAYER SEJATI!';
+  }
+  document.getElementById('finalDialogText').textContent = msg;
+  setTimeout(function() { speak(msg); }, 1000);
+  
+  const statsBox = document.getElementById('statsBox');
+  statsBox.innerHTML = '';
+  sorted.forEach(function(team, i) {
+    const div = document.createElement('div');
+    div.className = 'review-item correct';
+    div.style.marginBottom = '10px';
+    div.style.color = '#222';
+    div.innerHTML = 
+      '<div class="rq">' + (i + 1) + '. ' + team.name + ' — ' + team.score + ' poin</div>' +
+      '<div class="ra">✅ Benar: ' + team.correct + ' × 2 = ' + (team.correct * 2) + ' poin</div>' +
+      '<div class="ra wrong-ans">❌ Salah: ' + team.wrong + ' × (-1) = -' + team.wrong + ' poin</div>' +
+      '<div class="ra">⚡ Total buzz: ' + team.buzzed + ' kali</div>';
+    statsBox.appendChild(div);
+  });
+}
+
+function restartBattle() {
+  battleState.currentBabak = 0;
+  battleState.currentSoal = 0;
+  battleState.buzzingTeam = null;
+  battleState.selectedOption = null;
+  battleState.phase = 'waiting';
+  battleState.teams.forEach(function(t) { t.score = 0; t.correct = 0; t.wrong = 0; t.buzzed = 0; });
+  showScreen('screenSetup');
+}
+
+/* ============================================================
+   KEYBOARD
+   ============================================================ */
+function setupKeyboard() {
+  if (battleState.keyboardHandler) {
+    document.removeEventListener('keydown', battleState.keyboardHandler);
+  }
+  
+  battleState.keyboardHandler = function(e) {
+    if (!document.getElementById('screenArena').classList.contains('active')) return;
+    
+    const key = e.key.toLowerCase();
+    
+    if (battleState.phase === 'waiting') {
+      if (key === '1') buzz(0);
+      if (key === '2') buzz(1);
+    } else if (battleState.phase === 'answering') {
+      if (key === 'a') pilihJawaban(0);
+      if (key === 'b') pilihJawaban(1);
+      if (key === 'c') pilihJawaban(2);
+      if (key === 'd') pilihJawaban(3);
+    }
+  };
+  
+  document.addEventListener('keydown', battleState.keyboardHandler);
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+window.addEventListener('load', function() {
+  const startOnce = function() {
+    initAudio();
+    if (battleState.musicOn) startBgMusic('menu');
+    document.removeEventListener('click', startOnce);
+  };
+  document.addEventListener('click', startOnce);
+});
+
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+setInterval(function() {
+  if (document.getElementById('screenArena').classList.contains('active')) {
+    const z = document.createElement('div');
+    z.className = 'zombie-chase';
+    z.textContent = '🧟';
+    z.style.bottom = (Math.random() * 150 + 10) + 'px';
+    z.style.animationDuration = (Math.random() * 2 + 4) + 's';
+    document.body.appendChild(z);
+    setTimeout(function() { z.remove(); }, 6000);
+  }
+}, 10000);
+</script>
+
+</body>
+</html>
